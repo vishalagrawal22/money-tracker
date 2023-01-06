@@ -1,3 +1,9 @@
+import Layout from "../components/Layout";
+
 export default function Home() {
-  return <div>Money Tracker</div>;
+  return (
+    <Layout>
+      <div>Money Tracker</div>
+    </Layout>
+  );
 }
