@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-import { auth } from "../../firebase-config/client";
+import { auth } from "../../firebase-config";
 
 export const USER_NOT_FOUND = "auth/user-not-found";
 export const WRONG_PASSWORD = "auth/wrong-password";
