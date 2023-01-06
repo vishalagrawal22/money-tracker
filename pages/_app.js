@@ -1,3 +1,5 @@
+import Head from "next/head";
+
 import "../styles/globals.css";
 
 import { useUser } from "../utils/auth/client";
@@ -10,6 +12,15 @@ export default function App({ Component, pageProps }) {
   } else if (error) {
     return <div className="m-4">{error.message}</div>;
   } else {
-    return <Component {...pageProps} />;
+    return (
+      <>
+        <Head>
+          <title>Money Tracker</title>
+          <meta name="description" content="An app to monitor your spending" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Component {...pageProps} />
+      </>
+    );
   }
 }
