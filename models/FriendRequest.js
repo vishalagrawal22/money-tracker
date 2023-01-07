@@ -13,5 +13,6 @@ const FriendRequestSchema = new Schema({
   },
 });
 
-module.exports =
+const FriendRequest =
   models.FriendRequest || model("FriendRequest", FriendRequestSchema);
+export default FriendRequest;
