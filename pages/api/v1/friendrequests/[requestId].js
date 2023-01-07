@@ -9,9 +9,7 @@ import { connect } from "../../../../utils/db";
 
 async function handleUpdateFriendRequest(req, res) {
   const { requestId } = req.query;
-  console.log(requestId);
   const friendRequest = await FriendRequest.findById(requestId);
-  console.log(friendRequest);
   if (!friendRequest) {
     res.status(404).json({
       ok: false,

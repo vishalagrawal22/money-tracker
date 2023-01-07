@@ -1,6 +1,6 @@
 import useSWR from "swr";
 
-import { getAuthToken } from "./auth/client";
+import { getAuthToken, useUser } from "./auth/client";
 
 export async function postAsUser(uri, payload = {}) {
   const authToken = await getAuthToken();
@@ -66,5 +66,40 @@ export function useFriends() {
     friends: data?.friends,
     error,
     loading: isLoading,
+  };
+}
+
+export function useCurrentUser() {
+  const { data, error, isLoading } = useSWR("/api/v1/currentuser", getAsUser);
+  return {
+    currentUser: data?.currentUser,
+    error,
+    loading: isLoading,
+  };
+}
+
+export function useUserOptions() {
+  const {
+    friends,
+    error: friendsError,
+    loading: friendsLoading,
+  } = useFriends();
+
+  const {
+    currentUser,
+    error: currentUserError,
+    loading: currentUserLoading,
+  } = useCurrentUser();
+
+  const users = currentUser && friends ? [currentUser].concat(friends) : [];
+  const userOptions = users.map((user) => ({
+    value: user._id,
+    label: user.email,
+  }));
+
+  return {
+    userOptions,
+    loading: currentUserLoading || friendsLoading,
+    error: friendsError ? friendsError : currentUserError,
   };
 }
