@@ -83,7 +83,9 @@ export default function TransactionForm() {
             <FormGroup>
               <FormLabel>Description</FormLabel>
               <Field name="description">
-                {({ field }) => <FormControl {...field} type="text" />}
+                {({ field }) => (
+                  <FormControl as="textarea" {...field} type="text" />
+                )}
               </Field>
               {errors.description && touched.description ? (
                 <FormText className="text-danger">
