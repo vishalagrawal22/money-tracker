@@ -22,6 +22,14 @@ async function handleCreateFriendRequest(req, res) {
     return;
   }
 
+  if (!sender) {
+    res.status(404).json({
+      ok: false,
+      message: "sender not found",
+    });
+    return;
+  }
+
   if (sender._id.equals(receiver._id)) {
     res.status(400).json({
       ok: false,
@@ -30,9 +38,22 @@ async function handleCreateFriendRequest(req, res) {
     return;
   }
 
+  let alreadyFriend = false;
+  for (const friendId of sender["friends"]) {
+    if (receiver._id.equals(friendId)) alreadyFriend = true;
+  }
+
+  if (alreadyFriend) {
+    res.status(400).json({
+      ok: false,
+      message: "user is already a friend",
+    });
+    return;
+  }
+
   const existingRequest = await FriendRequest.findOne({
-    receiverID: receiver._id,
-    senderID: sender._id,
+    receiver: receiver._id,
+    sender: sender._id,
   });
 
   if (existingRequest) {
@@ -44,8 +65,8 @@ async function handleCreateFriendRequest(req, res) {
   }
 
   const friendRequest = new FriendRequest({
-    receiverID: receiver._id,
-    senderID: sender._id,
+    receiver: receiver._id,
+    sender: sender._id,
   });
 
   await friendRequest.save();
@@ -56,11 +77,46 @@ async function handleCreateFriendRequest(req, res) {
   });
 }
 
+async function handleRetrieveFriendRequests(req, res) {
+  const uid = await getUserId(req);
+  const user = await User.findOne({ uid });
+
+  if (!user) {
+    res.status(404).json({
+      ok: false,
+      message: "user not found",
+    });
+    return;
+  }
+
+  const friendRequestDocs = await FriendRequest.find({
+    receiver: user._id,
+  })
+    .populate("sender", {
+      uid: 1,
+      email: 1,
+    })
+    .exec();
+
+  const friendRequests = friendRequestDocs.map((friendRequestDoc) =>
+    friendRequestDoc.toObject()
+  );
+
+  res.status(200).json({
+    ok: true,
+    message: "successfully retrieved all friend requests",
+    friendRequests,
+  });
+}
+
 export default async function handler(req, res) {
   try {
     await connect();
 
     switch (req.method) {
+      case "GET":
+        await handleRetrieveFriendRequests(req, res);
+        break;
       case "POST":
         await handleCreateFriendRequest(req, res);
         break;
@@ -79,6 +135,7 @@ export default async function handler(req, res) {
         error,
       });
     } else {
+      console.error(error);
       res.status(500).json({
         ok: false,
         message: "Internal server error",

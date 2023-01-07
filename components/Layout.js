@@ -14,7 +14,15 @@ function Layout({ children }) {
     return (
       <>
         <Header />
-        <main className="p-4">{children}</main>
+        <main className="p-4 flex-grow-1 d-flex justify-content-center">
+          <div
+            style={{
+              minWidth: "40%",
+            }}
+          >
+            {children}
+          </div>
+        </main>
         <Footer />
       </>
     );

@@ -1,29 +1,29 @@
 import User from "../../../../models/User";
 
 import {
-  getUserData,
+  getUserId,
   UNAUTHENTICATED_ERROR,
 } from "../../../../utils/auth/server";
 import { connect } from "../../../../utils/db";
 
-async function handleAddUser(req, res) {
-  const userData = await getUserData(req);
-  const existingUser = await User.findOne({ uid: userData.uid });
+async function handleRetrieveFriends(req, res) {
+  const userId = await getUserId(req);
+  const user = await User.findOne({ uid: userId }).populate("friends").exec();
 
-  if (existingUser) {
-    res.status(400).json({
+  if (!user) {
+    res.status(404).json({
       ok: false,
-      message: "user already exist",
+      message: "user not found",
     });
     return;
   }
 
-  const user = new User(userData);
-  await user.save();
+  const friends = user["friends"].map((friend) => friend.toObject());
 
-  res.status(201).json({
+  res.status(200).json({
     ok: true,
-    message: "user created",
+    message: "successfully retrieved all friends",
+    friends,
   });
 }
 
@@ -32,8 +32,8 @@ export default async function handler(req, res) {
     await connect();
 
     switch (req.method) {
-      case "POST":
-        await handleAddUser(req, res);
+      case "GET":
+        await handleRetrieveFriends(req, res);
         break;
       default:
         res.status(405).json({
