@@ -25,7 +25,6 @@ export async function connect() {
         return mongoose;
       }
     );
-    mongooseSet("strictQuery", false);
   }
   cached.conn = await cached.promise;
   return cached.conn;

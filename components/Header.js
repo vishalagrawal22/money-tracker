@@ -20,7 +20,7 @@ function Header() {
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
           <Navbar.Text className="m-2">
-            Signed in as {user.displayName || user.email || ""}
+            Signed in as {user.email || ""}
           </Navbar.Text>
           <Button variant="secondary" active onClick={logout}>
             logout

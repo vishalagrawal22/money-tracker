@@ -7,7 +7,8 @@ import {
 } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-import { auth } from "../../firebase-config";
+import { auth } from "../../firebase-config/client";
+import { postAsUser } from "../data";
 
 export const USER_NOT_FOUND = "auth/user-not-found";
 export const WRONG_PASSWORD = "auth/wrong-password";
@@ -31,6 +32,7 @@ export async function loginWithEmailAndPassword(email, password) {
 const googleProvider = new GoogleAuthProvider();
 export async function loginOrRegisterWithGooglePopup() {
   await signInWithPopup(auth, googleProvider);
+  await postAsUser("/api/v1/users");
 }
 
 export async function logout() {
@@ -40,6 +42,7 @@ export async function logout() {
 export async function registerWithEmailAndPassword(email, password) {
   try {
     await createUserWithEmailAndPassword(auth, email, password);
+    await postAsUser("/api/v1/users");
   } catch (err) {
     const authError = err;
     if (authError.code === EMAIL_ALREADY_TAKEN) {
