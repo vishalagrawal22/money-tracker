@@ -103,3 +103,12 @@ export function useUserOptions() {
     error: friendsError ? friendsError : currentUserError,
   };
 }
+
+export function useTransactions() {
+  const { data, error, isLoading } = useSWR("/api/v1/transactions", getAsUser);
+  return {
+    transactions: data?.transactions,
+    error,
+    loading: isLoading,
+  };
+}
