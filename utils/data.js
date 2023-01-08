@@ -112,3 +112,15 @@ export function useTransactions() {
     loading: isLoading,
   };
 }
+
+export function useTransaction(id) {
+  const { data, error, isLoading } = useSWR(
+    `/api/v1/transactions/${id}`,
+    getAsUser
+  );
+  return {
+    transaction: data?.transaction,
+    error,
+    loading: isLoading,
+  };
+}
