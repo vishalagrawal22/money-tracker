@@ -1,4 +1,5 @@
 import { Formik, Form, Field } from "formik";
+import { useState } from "react";
 import {
   Form as BootstrapForm,
   Button,
@@ -6,6 +7,7 @@ import {
   FormControl,
   FormLabel,
   FormText,
+  Alert,
 } from "react-bootstrap";
 import Select from "react-select";
 import * as Yup from "yup";
@@ -15,6 +17,10 @@ import Layout from "../../components/Layout";
 import { postAsUser, useUserOptions } from "../../utils/data";
 
 export default function TransactionForm() {
+  const [submitResult, setSubmitResult] = useState({
+    message: "",
+    ok: true,
+  });
   const { userOptions } = useUserOptions();
 
   return (
@@ -43,12 +49,28 @@ export default function TransactionForm() {
           payer: Yup.object().required("Payer is required"),
           includePayerInSplit: Yup.boolean().required(),
         })}
-        onSubmit={async (values, { setSubmitting }) => {
-          const { users, payer, ...payload } = values;
-          payload.users = users.map((user) => user.value);
-          payload.payer = payer.value;
-          await postAsUser("/api/v1/transactions", payload);
-          setSubmitting(false);
+        onSubmit={async (values, { setSubmitting, resetForm }) => {
+          try {
+            const { users, payer, ...payload } = values;
+            payload.users = users.map((user) => user.value);
+            payload.payer = payer.value;
+            const { message, ok } = await postAsUser(
+              "/api/v1/transactions",
+              payload
+            );
+            setSubmitResult({
+              message,
+              ok,
+            });
+            resetForm();
+            setSubmitting(false);
+          } catch (error) {
+            setSubmitResult({
+              message: "transaction creation failed",
+              ok: false,
+            });
+            setSubmitting(false);
+          }
         }}
       >
         {({
@@ -178,7 +200,6 @@ export default function TransactionForm() {
                 </FormText>
               ) : null}
             </FormGroup>
-
             <Button
               className="align-self-center"
               type="submit"
@@ -187,6 +208,15 @@ export default function TransactionForm() {
             >
               Submit
             </Button>
+            {submitResult.message === "" ? null : submitResult.ok ? (
+              <Alert className="mt-2" variant="success">
+                {submitResult.message}
+              </Alert>
+            ) : (
+              <Alert className="mt-2" variant="danger">
+                {submitResult.message}
+              </Alert>
+            )}
           </Form>
         )}
       </Formik>
