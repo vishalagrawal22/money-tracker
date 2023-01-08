@@ -9,9 +9,9 @@ import {
 } from "react-bootstrap";
 import { DateTime } from "luxon";
 
-import Layout from "../../components/Layout";
+import Layout from "../../../components/Layout";
 
-import { deleteAsUser, useTransaction } from "../../utils/data";
+import { deleteAsUser, useTransaction } from "../../../utils/data";
 import { mutate } from "swr";
 
 export default function TransactionPage() {
@@ -55,7 +55,7 @@ export default function TransactionPage() {
             </ListGroupItem>
             <ListGroupItem>
               <span className="fw-bolder">Split:</span>{" "}
-              {transaction.split.toFixed(2)}
+              {transaction.split ? transaction.split.toFixed(2) : NaN}
             </ListGroupItem>
             <ListGroupItem>
               <span className="fw-bolder">Category:</span>{" "}
@@ -81,9 +81,18 @@ export default function TransactionPage() {
             </ListGroupItem>
           </ListGroup>
         </Card>
-        <ButtonGroup className="mt-4 d-flex align-items-center">
+        <ButtonGroup className="mt-4 d-flex">
           <Button variant="danger" onClick={handleDeleteTransaction} active>
             Delete
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              router.push(`/transactions/${transactionId}/update`);
+            }}
+            active
+          >
+            Update
           </Button>
         </ButtonGroup>
       </Layout>

@@ -7,11 +7,13 @@ import TransactionList from "../../components/TransactionList";
 export default function TransactionPage() {
   return (
     <Layout>
-      <Link href="/transactions/create">
-        <Button variant="primary" active>
-          Create Transaction
-        </Button>
-      </Link>
+      <div>
+        <Link href="/transactions/create">
+          <Button variant="primary" active>
+            Create Transaction
+          </Button>
+        </Link>
+      </div>
       <TransactionList />
     </Layout>
   );

@@ -72,6 +72,14 @@ async function handleDeleteTransaction(req, res) {
   const uid = await getUserId(req);
   const user = await User.findOne({ uid });
 
+  if (!user) {
+    res.status(400).json({
+      ok: false,
+      message: "user not found",
+    });
+    return;
+  }
+
   if (!user._id.equals(transaction.creator)) {
     res.status(400).json({
       ok: false,
@@ -88,6 +96,47 @@ async function handleDeleteTransaction(req, res) {
   });
 }
 
+async function handleUpdateTransaction(req, res) {
+  const { transactionId } = req.query;
+  const oldTransaction = await Transaction.findById(transactionId, {
+    creator: true,
+  });
+
+  if (!oldTransaction) {
+    res.status(404).json({
+      ok: false,
+      message: "transaction not found",
+    });
+    return;
+  }
+
+  const uid = await getUserId(req);
+  const user = await User.findOne({ uid });
+
+  if (!user) {
+    res.status(400).json({
+      ok: false,
+      message: "user not found",
+    });
+    return;
+  }
+
+  if (!user._id.equals(oldTransaction.creator)) {
+    res.status(400).json({
+      ok: false,
+      message: "transaction can be updated only by creator",
+    });
+    return;
+  }
+
+  await Transaction.updateOne({ _id: transactionId }, { ...req.body });
+
+  res.status(201).json({
+    ok: true,
+    message: "transaction updated",
+  });
+}
+
 export default async function handler(req, res) {
   try {
     await connect();
@@ -98,6 +147,10 @@ export default async function handler(req, res) {
         break;
       case "DELETE":
         await handleDeleteTransaction(req, res);
+        break;
+      case "PUT":
+        await handleUpdateTransaction(req, res);
+        break;
       default:
         res.status(405).json({
           ok: false,
@@ -106,6 +159,7 @@ export default async function handler(req, res) {
         break;
     }
   } catch (error) {
+    console.error(error);
     if (error === UNAUTHENTICATED_ERROR) {
       res.status(401).json({
         ok: false,

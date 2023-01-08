@@ -13,7 +13,7 @@ export default function TransactionCard({ transaction }) {
           </Card.Text>
           <Card.Text>
             <span className="fw-bolder">Split:</span>{" "}
-            {transaction.split.toFixed(2)}
+            {transaction.split ? transaction.split.toFixed(2) : NaN}
           </Card.Text>
         </div>
         <div className="d-flex flex-column flex-md-row justify-content-between mb-3">
