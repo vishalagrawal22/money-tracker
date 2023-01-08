@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { model, models, Schema } from "mongoose";
 
 const TransactionSchema = new Schema({
   title: {
@@ -20,12 +20,16 @@ const TransactionSchema = new Schema({
     type: Date,
     required: true,
   },
-  users: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+  users: {
+    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    validate: {
+      validator: function (v) {
+        return v.length > 0;
+      },
+      message: "The users array must have at least one element",
     },
-  ],
+    required: true,
+  },
   approvals: [
     {
       type: Schema.Types.ObjectId,

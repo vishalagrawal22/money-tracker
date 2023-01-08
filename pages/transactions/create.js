@@ -12,7 +12,7 @@ import * as Yup from "yup";
 
 import Layout from "../../components/Layout";
 
-import { useUserOptions } from "../../utils/data";
+import { postAsUser, useUserOptions } from "../../utils/data";
 
 export default function TransactionForm() {
   const { userOptions } = useUserOptions();
@@ -35,31 +35,20 @@ export default function TransactionForm() {
           description: Yup.string(),
           date: Yup.date().required("Date is required"),
           price: Yup.number().min(0).required("Price is required"),
-          users: Yup.array()
-            .of(
-              Yup.object().shape({
-                value: Yup.string(),
-                label: Yup.string(),
-              })
-            )
-            .required("At least one user is required"),
+          users: Yup.array().min(1, "At least one user is required"),
           category: Yup.string()
             .min(1)
             .max(100)
             .required("Category is required"),
-          payer: Yup.object()
-            .shape({
-              value: Yup.string(),
-              label: Yup.string(),
-            })
-            .required("Payer is required"),
+          payer: Yup.object().required("Payer is required"),
           includePayerInSplit: Yup.boolean().required(),
         })}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 400);
+        onSubmit={async (values, { setSubmitting }) => {
+          const { users, payer, ...payload } = values;
+          payload.users = users.map((user) => user.value);
+          payload.payer = payer.value;
+          await postAsUser("/api/v1/transactions", payload);
+          setSubmitting(false);
         }}
       >
         {({
@@ -157,20 +146,39 @@ export default function TransactionForm() {
               ) : null}
             </FormGroup>
             <FormGroup className="my-2">
-              <BootstrapForm.Check type="checkbox" id={`check-api-checkbox`}>
-                <BootstrapForm.Check.Input type="checkbox" />
-                <BootstrapForm.Check.Label>
-                  Include Payer in Split
-                </BootstrapForm.Check.Label>
-                <BootstrapForm.Control.Feedback>
-                  {errors.includePayerInSplit && touched.includePayerInSplit ? (
-                    <FormText className="text-danger">
-                      {errors.includePayerInSplit}
-                    </FormText>
-                  ) : null}
-                </BootstrapForm.Control.Feedback>
-              </BootstrapForm.Check>
+              <Field
+                name="includePayerInSplit"
+                type="checkbox"
+                id={`check-api-checkbox`}
+              >
+                {({ field }) => (
+                  <BootstrapForm.Check type="checkbox" {...field}>
+                    <BootstrapForm.Check.Input
+                      type="checkbox"
+                      checked={values.includePayerInSplit}
+                      onChange={(event) =>
+                        setFieldValue(
+                          "includePayerInSplit",
+                          event.target.checked
+                        )
+                      }
+                      onBlur={() =>
+                        setFieldTouched("includePayerInSplit", true)
+                      }
+                    />
+                    <BootstrapForm.Check.Label>
+                      Include Payer in Split
+                    </BootstrapForm.Check.Label>
+                  </BootstrapForm.Check>
+                )}
+              </Field>
+              {errors.includePayerInSplit && touched.includePayerInSplit ? (
+                <FormText className="text-danger">
+                  {errors.includePayerInSplit}
+                </FormText>
+              ) : null}
             </FormGroup>
+
             <Button
               className="align-self-center"
               type="submit"
