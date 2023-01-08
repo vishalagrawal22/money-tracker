@@ -157,7 +157,7 @@ export default function TransactionForm() {
                   <Select
                     {...field}
                     value={values.payer}
-                    options={userOptions}
+                    options={values.users}
                     onChange={(value) => setFieldValue("payer", value)}
                     onBlur={() => setFieldTouched("payer", true)}
                   />

@@ -40,6 +40,12 @@ const TransactionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    validate: {
+      validator: function (v) {
+        return this.users.includes(v);
+      },
+      message: "The payer must be included in the users array",
+    },
   },
   includePayerInSplit: {
     type: Boolean,
