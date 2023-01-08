@@ -57,6 +57,37 @@ async function handleRetrieveTransaction(req, res) {
   });
 }
 
+async function handleDeleteTransaction(req, res) {
+  const { transactionId } = req.query;
+  const transaction = await Transaction.findById(transactionId);
+
+  if (!transaction) {
+    res.status(404).json({
+      ok: false,
+      message: "transaction not found",
+    });
+    return;
+  }
+
+  const uid = await getUserId(req);
+  const user = await User.findOne({ uid });
+
+  if (!user._id.equals(transaction.creator)) {
+    res.status(400).json({
+      ok: false,
+      message: "transaction can be deleted only by creator",
+    });
+    return;
+  }
+
+  await transaction.remove();
+
+  res.status(200).json({
+    ok: true,
+    message: "successfully deleted transaction",
+  });
+}
+
 export default async function handler(req, res) {
   try {
     await connect();
@@ -65,6 +96,8 @@ export default async function handler(req, res) {
       case "GET":
         await handleRetrieveTransaction(req, res);
         break;
+      case "DELETE":
+        await handleDeleteTransaction(req, res);
       default:
         res.status(405).json({
           ok: false,

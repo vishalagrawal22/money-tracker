@@ -46,6 +46,20 @@ export async function getAsUser(uri) {
   return data;
 }
 
+export async function deleteAsUser(uri) {
+  const authToken = await getAuthToken();
+  const response = await fetch(uri, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await response.json();
+  return data;
+}
+
 export function useFriendRequests() {
   const { data, error, isLoading } = useSWR(
     "/api/v1/friendrequests",

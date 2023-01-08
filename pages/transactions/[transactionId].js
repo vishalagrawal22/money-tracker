@@ -1,15 +1,31 @@
 import { useRouter } from "next/router";
-import { Spinner, Card, ListGroup, ListGroupItem } from "react-bootstrap";
+import {
+  Spinner,
+  Card,
+  ListGroup,
+  ListGroupItem,
+  Button,
+  ButtonGroup,
+} from "react-bootstrap";
 import { DateTime } from "luxon";
 
 import Layout from "../../components/Layout";
 
-import { useTransaction } from "../../utils/data";
+import { deleteAsUser, useTransaction } from "../../utils/data";
+import { mutate } from "swr";
 
 export default function TransactionPage() {
   const router = useRouter();
   const { transactionId } = router.query;
   const { transaction, error, loading } = useTransaction(transactionId);
+
+  async function handleDeleteTransaction() {
+    await deleteAsUser(`/api/v1/transactions/${transactionId}`);
+    mutate("/api/v1/transactions");
+    mutate(`/api/v1/transactions/${transactionId}`);
+    router.push("/transactions");
+  }
+
   if (loading) {
     return <Spinner className="m-4" />;
   } else if (error) {
@@ -65,6 +81,11 @@ export default function TransactionPage() {
             </ListGroupItem>
           </ListGroup>
         </Card>
+        <ButtonGroup className="mt-4 d-flex align-items-center">
+          <Button variant="danger" onClick={handleDeleteTransaction} active>
+            Delete
+          </Button>
+        </ButtonGroup>
       </Layout>
     );
   }
