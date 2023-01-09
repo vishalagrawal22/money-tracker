@@ -159,7 +159,6 @@ export default async function handler(req, res) {
         break;
     }
   } catch (error) {
-    console.error(error);
     if (error === UNAUTHENTICATED_ERROR) {
       res.status(401).json({
         ok: false,

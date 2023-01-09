@@ -16,7 +16,6 @@ function TransactionList() {
   const [showFilter, setShowFilter] = useState(false);
 
   function handleFilterChange(filters) {
-    console.log(filters);
     setFilters(filters);
   }
 
