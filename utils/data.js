@@ -121,7 +121,7 @@ export function useUserOptions() {
 export function useTransactions() {
   const { data, error, isLoading } = useSWR("/api/v1/transactions", getAsUser);
   return {
-    transactions: data?.transactions,
+    transactions: data?.transactions || [],
     error,
     loading: isLoading,
   };
