@@ -1,15 +1,25 @@
-import ListGroup from "react-bootstrap/ListGroup";
+import { Badge, Table } from "react-bootstrap";
 
-function Friend({ friend }) {
+function Friend({ payment, friend }) {
   return (
-    <ListGroup.Item
-      as="li"
-      className="d-flex align-items-center justify-content-between"
-    >
-      <div className="w-100 align-items-center d-flex ms-2">
-        <div>{friend.email}</div>
-      </div>
-    </ListGroup.Item>
+    <tr>
+      <td>{friend.email}</td>
+      <td className={`text-${payment.receive > 0 ? "success" : "dark"}`}>
+        {payment.receive}
+      </td>
+      <td className={`text-${payment.pay > 0 ? "danger" : "dark"}`}>
+        {payment.pay}
+      </td>
+      <td
+        className={`text-${
+          payment.receive - payment.pay > 0 ? "success" : "danger"
+        }`}
+      >
+        {payment.receive - payment.pay > 0
+          ? `You are owed ${payment.receive - payment.pay}`
+          : `You owe ${payment.pay - payment.receive}`}
+      </td>
+    </tr>
   );
 }
 

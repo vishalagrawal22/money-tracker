@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import useSWR from "swr";
 
 import { getAuthToken, useUser } from "./auth/client";
@@ -120,11 +121,16 @@ export function useUserOptions() {
 
 export function useTransactions() {
   const { data, error, isLoading } = useSWR("/api/v1/transactions", getAsUser);
-  return {
-    transactions: data?.transactions || [],
-    error,
-    loading: isLoading,
-  };
+
+  const transactionsData = useMemo(() => {
+    return {
+      transactions: data?.transactions || [],
+      error,
+      loading: isLoading,
+    };
+  }, [data, error, isLoading]);
+
+  return transactionsData;
 }
 
 export function useTransaction(id) {

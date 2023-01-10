@@ -1,16 +1,62 @@
 import Spinner from "react-bootstrap/Spinner";
 import ListGroup from "react-bootstrap/ListGroup";
 
-import { useFriends } from "../utils/data";
+import { useFriends, useTransactions } from "../utils/data";
+import { useUser } from "../utils/auth/client";
 
 import Friend from "./Friend";
+import { useEffect, useMemo, useState } from "react";
+import { Table } from "react-bootstrap";
 
 function FriendList() {
-  const { friends, loading, error } = useFriends();
-  if (loading) {
+  const { user: currentUser } = useUser();
+  const {
+    friends,
+    loading: friendsLoading,
+    error: friendsError,
+  } = useFriends();
+  const {
+    transactions,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useTransactions();
+
+  const payments = useMemo(() => {
+    const payments = new Map();
+
+    function addAmount(userId, amount, type) {
+      if (!(userId in payments)) {
+        payments[userId] = {
+          receive: 0,
+          pay: 0,
+        };
+      }
+      payments[userId][type] += amount;
+    }
+
+    transactions.forEach((transaction) => {
+      if (transaction.payer.uid === currentUser.uid) {
+        for (const user of transaction.users) {
+          if (user.uid === currentUser.uid) continue;
+
+          addAmount(user._id, transaction.split, "receive");
+        }
+      } else {
+        addAmount(transaction.payer._id, transaction.split, "pay");
+      }
+    });
+
+    return payments;
+  }, [transactions, currentUser]);
+
+  if (friendsLoading || transactionsLoading) {
     return <Spinner className="m-4" />;
-  } else if (error) {
-    return <div className="m-4">{error.message}</div>;
+  } else if (friendsError || transactionsError) {
+    return (
+      <div className="m-4">
+        {friendsError.message || transactionsError.message}
+      </div>
+    );
   } else {
     return (
       <>
@@ -18,11 +64,27 @@ function FriendList() {
         {friends.length === 0 && (
           <div className="mt-2">There are no friends.</div>
         )}
-        <ListGroup as="ul" className="mt-4">
-          {friends.map((friend) => (
-            <Friend key={friend._id} friend={friend} />
-          ))}
-        </ListGroup>
+        <Table striped bordered hover className="mt-4">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Need to receive</th>
+              <th>Need to pay</th>
+              <th>Net Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {friends.map((friend) => {
+              return (
+                <Friend
+                  friend={friend}
+                  payment={payments[friend._id]}
+                  key={friend._id}
+                />
+              );
+            })}
+          </tbody>
+        </Table>
       </>
     );
   }
