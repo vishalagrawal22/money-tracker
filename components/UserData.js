@@ -29,13 +29,13 @@ function UserData() {
           <Row>
             <Card.Text>
               {remaining >= 0 ? (
-                <div className="text-success">
+                <span className="text-success">
                   Remaining Budget: {remaining}
-                </div>
+                </span>
               ) : (
-                <div className="text-danger">
+                <span className="text-danger">
                   Amount Above Budget: {Math.abs(remaining)}
-                </div>
+                </span>
               )}
             </Card.Text>
           </Row>
