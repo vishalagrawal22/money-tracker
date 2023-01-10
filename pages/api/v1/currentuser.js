@@ -13,6 +13,18 @@ async function handleRetrieveCurrentUser(req, res) {
   });
 }
 
+async function handleUpdateCurrentUser(req, res) {
+  const uid = await getUserId(req);
+  const currentUser = await User.findOne({ uid });
+
+  await User.updateOne({ _id: currentUser._id }, { ...req.body });
+
+  res.status(200).json({
+    ok: true,
+    message: "user updated",
+  });
+}
+
 export default async function handler(req, res) {
   try {
     await connect();
@@ -21,6 +33,8 @@ export default async function handler(req, res) {
       case "GET":
         await handleRetrieveCurrentUser(req, res);
         break;
+      case "PUT":
+        await handleUpdateCurrentUser(req, res);
       default:
         res.status(405).json({
           ok: false,

@@ -2,7 +2,10 @@ import Link from "next/link";
 import { DateTime } from "luxon";
 import { Card, Button } from "react-bootstrap";
 
+import { useUser } from "../utils/auth/client";
+
 export default function TransactionCard({ transaction }) {
+  const { user } = useUser();
   return (
     <Card className="mb-4">
       <Card.Body className="d-flex flex-column p-4">
@@ -13,7 +16,15 @@ export default function TransactionCard({ transaction }) {
           </Card.Text>
           <Card.Text>
             <span className="fw-bolder">Split:</span>{" "}
-            {transaction.split ? transaction.split.toFixed(2) : NaN}
+            {transaction.split ? transaction.split.toFixed(2) : NaN}{" "}
+            <span>
+              (
+              {transaction.payer.uid !== user.uid ||
+              transaction.includePayerInSplit
+                ? "Included"
+                : "Excluded"}
+              )
+            </span>
           </Card.Text>
         </div>
         <div className="d-flex flex-column flex-md-row justify-content-between mb-3">

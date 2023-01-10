@@ -86,10 +86,55 @@ export function useFriends() {
 
 export function useCurrentUser() {
   const { data, error, isLoading } = useSWR("/api/v1/currentuser", getAsUser);
+
+  const currentUserData = useMemo(() => {
+    return {
+      currentUser: data?.currentUser,
+      error,
+      loading: isLoading,
+    };
+  }, [data, error, isLoading]);
+
+  return currentUserData;
+}
+
+export function useSpent() {
+  const { user } = useUser();
+  const { transactions, loading, error } = useTransactions();
+
+  const spent = useMemo(() => {
+    let spent = 0;
+    if (user) {
+      const payableTransactions = transactions.filter((transaction) => {
+        if (transaction.payer.uid === user.uid) {
+          return transaction.includePayerInSplit;
+        } else {
+          return true;
+        }
+      });
+
+      spent = payableTransactions.reduce(
+        (total, transaction) => total + transaction.split,
+        0
+      );
+    }
+    return spent;
+  }, [user, transactions]);
+
   return {
-    currentUser: data?.currentUser,
+    spent,
+    loading,
     error,
-    loading: isLoading,
+  };
+}
+
+export function useBudget() {
+  const { currentUser, loading, error } = useCurrentUser();
+
+  return {
+    budget: currentUser?.budget,
+    loading,
+    error,
   };
 }
 

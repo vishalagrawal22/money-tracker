@@ -1,5 +1,3 @@
-import { Badge, Table } from "react-bootstrap";
-
 function Friend({ payment, friend }) {
   return (
     <tr>
