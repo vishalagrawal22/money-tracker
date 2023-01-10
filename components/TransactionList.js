@@ -19,6 +19,34 @@ function TransactionList() {
     setFilters(filters);
   }
 
+  function getCategories() {
+    const categories = transactions
+      .map((transaction) => ({
+        label: transaction.category,
+        value: transaction.category,
+      }))
+      .reduce((categories, category) => {
+        const x = categories.find(
+          (currentCategory) => currentCategory["value"] === category["value"]
+        );
+        if (!x) {
+          return categories.concat([category]);
+        } else {
+          return categories;
+        }
+      }, [])
+      .sort(function (firstCategory, secondCategory) {
+        if (firstCategory["value"] < secondCategory["value"]) {
+          return -1;
+        } else if (firstCategory["value"] > secondCategory["value"]) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+    return categories;
+  }
+
   function getFilteredTransactions() {
     const { category, startDate, endDate } = filters;
     return transactions
@@ -50,10 +78,7 @@ function TransactionList() {
         </Button>
         {showFilter && (
           <TransactionFilterForm
-            categories={transactions.map((transaction) => ({
-              label: transaction.category,
-              value: transaction.category,
-            }))}
+            categories={getCategories()}
             onFilter={handleFilterChange}
           />
         )}
