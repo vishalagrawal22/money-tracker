@@ -35,6 +35,7 @@ export default async function handler(req, res) {
         break;
       case "PUT":
         await handleUpdateCurrentUser(req, res);
+        break;
       default:
         res.status(405).json({
           ok: false,
