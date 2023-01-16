@@ -30,6 +30,14 @@ const TransactionSchema = new Schema({
     },
     required: true,
   },
+  approvals: {
+    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    required: true,
+  },
+  rejections: {
+    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    required: true,
+  },
   category: {
     type: String,
     required: true,

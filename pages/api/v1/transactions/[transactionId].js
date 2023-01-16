@@ -7,6 +7,8 @@ import {
 } from "../../../../utils/auth/server";
 import { connect } from "../../../../utils/db";
 
+import { checkObjectIdInArray } from "../../../../utils/helpers";
+
 async function handleRetrieveTransaction(req, res) {
   const { transactionId } = req.query;
   const transaction = await Transaction.findById(transactionId)
@@ -100,6 +102,9 @@ async function handleUpdateTransaction(req, res) {
   const { transactionId } = req.query;
   const oldTransaction = await Transaction.findById(transactionId, {
     creator: true,
+    users: true,
+    approvals: true,
+    rejections: true,
   });
 
   if (!oldTransaction) {
@@ -121,6 +126,50 @@ async function handleUpdateTransaction(req, res) {
     return;
   }
 
+  if (req.body.hasOwnProperty("action")) {
+    if (!checkObjectIdInArray(user._id, oldTransaction["users"])) {
+      res.status(400).json({
+        ok: false,
+        message: "current user can not approve or reject the transacton",
+      });
+      return;
+    }
+
+    if (
+      checkObjectIdInArray(user._id, oldTransaction["approvals"]) ||
+      checkObjectIdInArray(user._id, oldTransaction["rejections"])
+    ) {
+      res.status(400).json({
+        ok: false,
+        message: "current user already approved or rejected the transacton",
+      });
+      return;
+    }
+
+    switch (req.body.action) {
+      case "approve":
+        await Transaction.findOneAndUpdate(
+          { _id: transactionId },
+          { $push: { approvals: user._id } },
+          { runValidators: true }
+        );
+        break;
+      case "reject":
+        await Transaction.findOneAndUpdate(
+          { _id: transactionId },
+          { $push: { rejections: user._id } },
+          { runValidators: true }
+        );
+        break;
+    }
+
+    res.status(200).json({
+      ok: true,
+      message: "transaction updated",
+    });
+    return;
+  }
+
   if (!user._id.equals(oldTransaction.creator)) {
     res.status(400).json({
       ok: false,
@@ -129,9 +178,13 @@ async function handleUpdateTransaction(req, res) {
     return;
   }
 
-  await Transaction.updateOne({ _id: transactionId }, { ...req.body });
+  await Transaction.updateOne(
+    { _id: transactionId },
+    { ...req.body },
+    { runValidators: true }
+  );
 
-  res.status(201).json({
+  res.status(200).json({
     ok: true,
     message: "transaction updated",
   });
@@ -165,6 +218,7 @@ export default async function handler(req, res) {
         message: "Unauthorized",
       });
     } else {
+      console.error(error);
       res.status(500).json({
         ok: false,
         message: "Internal server error",

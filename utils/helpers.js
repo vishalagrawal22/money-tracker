@@ -1,3 +1,13 @@
+export function checkObjectIdInArray(idToSearch, array) {
+  let present = false;
+  for (const object of array) {
+    if (object._id.equals(idToSearch)) {
+      present = true;
+    }
+  }
+  return present;
+}
+
 export function checkUidInArray(uidToSearch, array) {
   let present = false;
   for (const user of array) {
