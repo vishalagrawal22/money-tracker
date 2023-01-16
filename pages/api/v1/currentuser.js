@@ -17,7 +17,11 @@ async function handleUpdateCurrentUser(req, res) {
   const uid = await getUserId(req);
   const currentUser = await User.findOne({ uid });
 
-  await User.updateOne({ _id: currentUser._id }, { ...req.body });
+  await User.updateOne(
+    { _id: currentUser._id },
+    { ...req.body },
+    { runValidators: true }
+  );
 
   res.status(200).json({
     ok: true,
