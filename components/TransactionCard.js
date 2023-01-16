@@ -4,6 +4,8 @@ import { Card, Button } from "react-bootstrap";
 
 import { useUser } from "../utils/auth/client";
 
+import { checkUidInArray } from "../utils/helpers";
+
 export default function TransactionCard({ transaction }) {
   const { user } = useUser();
   return (
@@ -19,8 +21,9 @@ export default function TransactionCard({ transaction }) {
             {transaction.split ? transaction.split.toFixed(2) : NaN}{" "}
             <span>
               (
-              {transaction.payer.uid !== user.uid ||
-              transaction.includePayerInSplit
+              {checkUidInArray(user.uid, transaction["users"]) &&
+              (transaction.payer.uid !== user.uid ||
+                transaction.includePayerInSplit)
                 ? "Included"
                 : "Excluded"}
               )
