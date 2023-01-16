@@ -1,13 +1,27 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
+import { mutate } from "swr";
 import { Card, Button } from "react-bootstrap";
 
 import { useUser } from "../utils/auth/client";
 
+import { putAsUser } from "../utils/data";
 import { checkUidInArray } from "../utils/helpers";
 
-export default function TransactionCard({ transaction }) {
+export default function TransactionCard({
+  transaction,
+  pendingApproval = false,
+}) {
   const { user } = useUser();
+
+  async function updateTransactionApprovalStatus(action) {
+    await putAsUser(`/api/v1/transactions/${transaction._id}`, {
+      action,
+    });
+    mutate("/api/v1/transactions");
+    mutate(`/api/v1/transactions/${transaction._id}`);
+  }
+
   return (
     <Card className="mb-4">
       <Card.Body className="d-flex flex-column p-4">
@@ -42,14 +56,38 @@ export default function TransactionCard({ transaction }) {
           </Card.Text>
         </div>
         <Card.Text className="mb-3">{transaction.description}</Card.Text>
-        <Link
-          className="align-self-center"
-          href={`/transactions/${transaction._id}`}
-        >
-          <Button variant="secondary" active>
-            Read more
-          </Button>
-        </Link>
+        {pendingApproval ? (
+          <div className="d-flex justify-content-center">
+            <Button
+              variant="success"
+              className="mr-3"
+              active
+              onClick={() => {
+                updateTransactionApprovalStatus("approve");
+              }}
+            >
+              Approve
+            </Button>
+            <Button
+              variant="danger"
+              active
+              onClick={() => {
+                updateTransactionApprovalStatus("reject");
+              }}
+            >
+              Reject
+            </Button>
+          </div>
+        ) : (
+          <Link
+            className="align-self-center"
+            href={`/transactions/${transaction._id}`}
+          >
+            <Button variant="secondary" active>
+              Read more
+            </Button>
+          </Link>
+        )}
       </Card.Body>
     </Card>
   );
