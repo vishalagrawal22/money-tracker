@@ -43,7 +43,9 @@ async function handleRetrieveTransactions(req, res) {
     return;
   }
 
-  const transactionDocs = await Transaction.find({ users: user._id })
+  const transactionDocs = await Transaction.find({
+    $or: [{ users: user._id }, { creator: user._id }],
+  })
     .populate("users", {
       uid: 1,
       email: 1,
