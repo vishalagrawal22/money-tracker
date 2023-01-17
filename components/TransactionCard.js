@@ -3,17 +3,34 @@ import { DateTime } from "luxon";
 import { mutate } from "swr";
 import { Card, Button } from "react-bootstrap";
 
-import { useUser } from "../utils/auth/client";
-
 import { putAsUser } from "../utils/data";
 import { checkUidInArray } from "../utils/helpers";
 
-export default function TransactionCard({
-  transaction,
-  pendingApproval = false,
-}) {
-  const { user } = useUser();
+function checkIfCurrentUserCanVote(transaction, currentUserId) {
+  return transaction.users.some((user) => user._id === currentUserId);
+}
 
+function checkIfCurrentUserAlreadyVoted(transaction, currentUserId) {
+  // Check if current user's ID is present in the approvals array
+  const approved = transaction.approvals.find(
+    (userId) => userId === currentUserId
+  );
+
+  // Check if current user's ID is present in the rejections array
+  const rejected = transaction.rejections.find(
+    (userId) => userId === currentUserId
+  );
+
+  // If either approved or rejected is not undefined, then the current user has already voted
+  if (approved || rejected) {
+    return true;
+  }
+
+  // Otherwise, the current user has not yet voted
+  return false;
+}
+
+export default function TransactionCard({ currentUser, transaction }) {
   async function updateTransactionApprovalStatus(action) {
     await putAsUser(`/api/v1/transactions/${transaction._id}`, {
       action,
@@ -21,6 +38,18 @@ export default function TransactionCard({
     mutate("/api/v1/transactions");
     mutate(`/api/v1/transactions/${transaction._id}`);
   }
+
+  const canCurrentUserVote = checkIfCurrentUserCanVote(
+    transaction,
+    currentUser._id
+  );
+
+  const currentUserAlreadyVoted = checkIfCurrentUserAlreadyVoted(
+    transaction,
+    currentUser._id
+  );
+
+  const renderActionButtons = canCurrentUserVote && !currentUserAlreadyVoted;
 
   return (
     <Card className="mb-4">
@@ -35,8 +64,8 @@ export default function TransactionCard({
             {transaction.split ? transaction.split.toFixed(2) : NaN}{" "}
             <span>
               (
-              {checkUidInArray(user.uid, transaction["users"]) &&
-              (transaction.payer.uid !== user.uid ||
+              {checkUidInArray(currentUser.uid, transaction["users"]) &&
+              (transaction.payer.uid !== currentUser.uid ||
                 transaction.includePayerInSplit)
                 ? "Included"
                 : "Excluded"}
@@ -56,7 +85,7 @@ export default function TransactionCard({
           </Card.Text>
         </div>
         <Card.Text className="mb-3">{transaction.description}</Card.Text>
-        {pendingApproval ? (
+        {renderActionButtons ? (
           <div className="d-flex justify-content-center">
             <Button
               variant="success"

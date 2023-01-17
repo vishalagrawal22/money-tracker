@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { Spinner, ListGroup, Button } from "react-bootstrap";
 
-import { useTransactions } from "../utils/data";
+import { useCurrentUser, useTransactions } from "../utils/data";
 
 import TransactionCard from "./TransactionCard";
 import TransactionFilterForm from "./TransactionFilterForm";
 
 function TransactionList() {
-  const { transactions, loading, error } = useTransactions();
+  const {
+    currentUser,
+    loading: currentUserLoading,
+    error: currentUserError,
+  } = useCurrentUser();
+
+  const {
+    transactions,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useTransactions();
+
   const [filters, setFilters] = useState({
     category: null,
     startDate: "",
@@ -61,10 +72,14 @@ function TransactionList() {
       );
   }
 
-  if (loading) {
+  if (currentUserLoading || transactionsLoading) {
     return <Spinner className="m-4" />;
-  } else if (error) {
-    return <div className="m-4">{error.message}</div>;
+  } else if (currentUserError || transactionsError) {
+    return (
+      <div className="m-4">
+        {currentUserError.message || transactionsError.message}
+      </div>
+    );
   } else {
     return (
       <>
@@ -87,7 +102,11 @@ function TransactionList() {
         )}
         <ListGroup as="ul" className="mt-4">
           {getFilteredTransactions().map((transaction) => (
-            <TransactionCard key={transaction._id} transaction={transaction} />
+            <TransactionCard
+              key={transaction._id}
+              currentUser={currentUser}
+              transaction={transaction}
+            />
           ))}
         </ListGroup>
       </>
