@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Spinner, ListGroup, Button, ButtonGroup } from "react-bootstrap";
 
-import { useCurrentUser, useTransactions } from "../utils/data";
+import {
+  getTransactionStatus,
+  useCurrentUser,
+  useTransactions,
+} from "../utils/data";
 import { capitalize } from "../utils/helpers";
 
 import TransactionCard from "./TransactionCard";
@@ -110,6 +114,7 @@ function TransactionList() {
 
   function getFilteredTransactions() {
     const { type, category, startDate, endDate } = filters;
+
     let filteredTransactions = transactions
       .filter((transaction) => !category || transaction.category === category)
       .filter(
@@ -119,25 +124,11 @@ function TransactionList() {
       .filter(
         (transaction) =>
           !endDate || new Date(transaction.date) <= new Date(endDate)
-      );
-
-    if (type === "approved") {
-      filteredTransactions = filteredTransactions.filter(
+      )
+      .filter(
         (transaction) =>
-          transaction.approvals.length === transaction.users.length &&
-          transaction.rejections.length === 0
+          type === "all" || getTransactionStatus(transaction) === type
       );
-    } else if (type === "rejected") {
-      filteredTransactions = filteredTransactions.filter(
-        (transaction) => transaction.rejections.length > 0
-      );
-    } else if (type === "pending") {
-      filteredTransactions = filteredTransactions.filter(
-        (transaction) =>
-          transaction.approvals.length !== transaction.users.length &&
-          transaction.rejections.length === 0
-      );
-    }
 
     return filteredTransactions;
   }
