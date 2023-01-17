@@ -1,10 +1,57 @@
 import { useState } from "react";
-import { Spinner, ListGroup, Button } from "react-bootstrap";
+import { Spinner, ListGroup, Button, ButtonGroup } from "react-bootstrap";
 
 import { useCurrentUser, useTransactions } from "../utils/data";
+import { capitalize } from "../utils/helpers";
 
 import TransactionCard from "./TransactionCard";
 import TransactionFilterForm from "./TransactionFilterForm";
+
+function TypeFilterButton({ onFilter, activeType, type }) {
+  return (
+    <Button
+      variant="secondary"
+      className={`text-gray-500 ${activeType === type ? "text-white" : ""}`}
+      onClick={() =>
+        onFilter({
+          type,
+        })
+      }
+      active={activeType === type}
+    >
+      {capitalize(type)}
+    </Button>
+  );
+}
+
+function TypeFilterButtonGroup({ onFilter, activeType }) {
+  return (
+    <div className="d-flex flex-column align-items-center">
+      <ButtonGroup>
+        <TypeFilterButton
+          onFilter={onFilter}
+          activeType={activeType}
+          type="all"
+        />
+        <TypeFilterButton
+          onFilter={onFilter}
+          activeType={activeType}
+          type="pending"
+        />
+        <TypeFilterButton
+          onFilter={onFilter}
+          activeType={activeType}
+          type="approved"
+        />
+        <TypeFilterButton
+          onFilter={onFilter}
+          activeType={activeType}
+          type="rejected"
+        />
+      </ButtonGroup>
+    </div>
+  );
+}
 
 function TransactionList() {
   const {
@@ -20,14 +67,16 @@ function TransactionList() {
   } = useTransactions();
 
   const [filters, setFilters] = useState({
+    type: "all",
     category: null,
     startDate: "",
     endDate: "",
   });
+
   const [showFilter, setShowFilter] = useState(false);
 
-  function handleFilterChange(filters) {
-    setFilters(filters);
+  function handleFilterChange(newFilters) {
+    setFilters({ newFilters, ...newFilters });
   }
 
   function getCategories() {
@@ -59,8 +108,8 @@ function TransactionList() {
   }
 
   function getFilteredTransactions() {
-    const { category, startDate, endDate } = filters;
-    return transactions
+    const { type, category, startDate, endDate } = filters;
+    let filteredTransactions = transactions
       .filter((transaction) => !category || transaction.category === category)
       .filter(
         (transaction) =>
@@ -70,6 +119,26 @@ function TransactionList() {
         (transaction) =>
           !endDate || new Date(transaction.date) <= new Date(endDate)
       );
+
+    if (type === "approved") {
+      filteredTransactions = filteredTransactions.filter(
+        (transaction) =>
+          transaction.approvals.length === transaction.users.length &&
+          transaction.rejections.length === 0
+      );
+    } else if (type === "rejected") {
+      filteredTransactions = filteredTransactions.filter(
+        (transaction) => transaction.rejections.length > 0
+      );
+    } else if (type === "pending") {
+      filteredTransactions = filteredTransactions.filter(
+        (transaction) =>
+          transaction.approvals.length !== transaction.users.length &&
+          transaction.rejections.length === 0
+      );
+    }
+
+    return filteredTransactions;
   }
 
   if (currentUserLoading || transactionsLoading) {
@@ -97,8 +166,14 @@ function TransactionList() {
             onFilter={handleFilterChange}
           />
         )}
+
+        <TypeFilterButtonGroup
+          onFilter={handleFilterChange}
+          activeType={filters.type}
+        />
+
         {getFilteredTransactions().length === 0 && (
-          <div>There are no transactions.</div>
+          <div className="mt-3">There are no transactions.</div>
         )}
         <ListGroup as="ul" className="mt-4">
           {getFilteredTransactions().map((transaction) => (

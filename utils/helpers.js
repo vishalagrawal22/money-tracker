@@ -17,3 +17,7 @@ export function checkUidInArray(uidToSearch, array) {
   }
   return present;
 }
+
+export function capitalize(str) {
+  return str.substring(0, 1).toUpperCase() + str.substring(1);
+}
