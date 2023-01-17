@@ -6,7 +6,7 @@ import { Card, Button } from "react-bootstrap";
 import { putAsUser } from "../utils/data";
 import { checkUidInArray } from "../utils/helpers";
 
-function checkIfCurrentUserCanVote(transaction, currentUserId) {
+function checkCanCurrentUserCanVote(transaction, currentUserId) {
   return transaction.users.some((user) => user._id === currentUserId);
 }
 
@@ -30,6 +30,24 @@ function checkIfCurrentUserAlreadyVoted(transaction, currentUserId) {
   return false;
 }
 
+function getCurrentUserVote(transaction, currentUserId) {
+  const approved = transaction.approvals.find(
+    (userId) => userId === currentUserId
+  );
+  if (approved) {
+    return "approved";
+  }
+
+  const rejected = transaction.rejections.find(
+    (userId) => userId === currentUserId
+  );
+  if (rejected) {
+    return "rejected";
+  }
+
+  return "user has not voted";
+}
+
 export default function TransactionCard({ currentUser, transaction }) {
   async function updateTransactionApprovalStatus(action) {
     await putAsUser(`/api/v1/transactions/${transaction._id}`, {
@@ -39,7 +57,7 @@ export default function TransactionCard({ currentUser, transaction }) {
     mutate(`/api/v1/transactions/${transaction._id}`);
   }
 
-  const canCurrentUserVote = checkIfCurrentUserCanVote(
+  const canCurrentUserVote = checkCanCurrentUserCanVote(
     transaction,
     currentUser._id
   );
@@ -50,6 +68,8 @@ export default function TransactionCard({ currentUser, transaction }) {
   );
 
   const renderActionButtons = canCurrentUserVote && !currentUserAlreadyVoted;
+
+  const userVote = getCurrentUserVote(transaction, currentUser._id);
 
   return (
     <Card className="mb-4">
@@ -108,14 +128,28 @@ export default function TransactionCard({ currentUser, transaction }) {
             </Button>
           </div>
         ) : (
-          <Link
-            className="align-self-center"
-            href={`/transactions/${transaction._id}`}
-          >
-            <Button variant="secondary" active>
-              Read more
-            </Button>
-          </Link>
+          <>
+            {currentUserAlreadyVoted && userVote !== "user has not voted" && (
+              <div className="text-center mb-3 fw-semibold">
+                You have {userVote} this transaction
+              </div>
+            )}
+
+            {!canCurrentUserVote && (
+              <div className="text-center mb-3 fw-semibold">
+                You cannot vote on this transaction because you are not listed
+                as a user
+              </div>
+            )}
+            <Link
+              className="align-self-center"
+              href={`/transactions/${transaction._id}`}
+            >
+              <Button variant="secondary" active>
+                Read more
+              </Button>
+            </Link>
+          </>
         )}
       </Card.Body>
     </Card>
