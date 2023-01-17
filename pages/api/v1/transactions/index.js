@@ -58,6 +58,10 @@ async function handleRetrieveTransactions(req, res) {
       uid: 1,
       email: 1,
     })
+    .populate("rejections", {
+      uid: 1,
+      email: 1,
+    })
     .exec();
 
   const transactions = transactionDocs.map((transaction) =>

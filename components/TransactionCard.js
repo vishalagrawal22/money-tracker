@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { mutate } from "swr";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, ListGroup } from "react-bootstrap";
 
-import { putAsUser } from "../utils/data";
+import { getTransactionStatus, putAsUser } from "../utils/data";
 import { checkUidInArray } from "../utils/helpers";
 
 function checkCanCurrentUserCanVote(transaction, currentUserId) {
@@ -18,7 +18,7 @@ function checkIfCurrentUserAlreadyVoted(transaction, currentUserId) {
 
   // Check if current user's ID is present in the rejections array
   const rejected = transaction.rejections.find(
-    (userId) => userId === currentUserId
+    (user) => user._id === currentUserId
   );
 
   // If either approved or rejected is not undefined, then the current user has already voted
@@ -39,13 +39,20 @@ function getCurrentUserVote(transaction, currentUserId) {
   }
 
   const rejected = transaction.rejections.find(
-    (userId) => userId === currentUserId
+    (user) => user._id === currentUserId
   );
+
   if (rejected) {
     return "rejected";
   }
 
   return "user has not voted";
+}
+
+function getRejectionUserEmailList(transaction, currentUser) {
+  return transaction.rejections.map((rejection) =>
+    rejection.uid === currentUser.uid ? "You" : rejection.email
+  );
 }
 
 export default function TransactionCard({ currentUser, transaction }) {
@@ -70,6 +77,8 @@ export default function TransactionCard({ currentUser, transaction }) {
   const renderActionButtons = canCurrentUserVote && !currentUserAlreadyVoted;
 
   const userVote = getCurrentUserVote(transaction, currentUser._id);
+
+  const transactionStatus = getTransactionStatus(transaction);
 
   return (
     <Card className="mb-4">
@@ -129,20 +138,28 @@ export default function TransactionCard({ currentUser, transaction }) {
           </div>
         ) : (
           <>
-            {currentUserAlreadyVoted && userVote !== "user has not voted" && (
-              <div className="text-center mb-3 fw-semibold">
+            {currentUserAlreadyVoted && userVote === "approved" && (
+              <div className="text-center fw-semibold">
                 You have {userVote} this transaction
               </div>
             )}
 
             {!canCurrentUserVote && (
-              <div className="text-center mb-3 fw-semibold">
+              <div className="text-center fw-semibold">
                 You cannot vote on this transaction because you are not listed
                 as a user
               </div>
             )}
+
+            {transactionStatus === "rejected" && (
+              <div className="text-center fw-semibold">
+                Rejected by{" "}
+                {getRejectionUserEmailList(transaction, currentUser).join(", ")}
+              </div>
+            )}
+
             <Link
-              className="align-self-center"
+              className="align-self-center mt-3"
               href={`/transactions/${transaction._id}`}
             >
               <Button variant="secondary" active>
