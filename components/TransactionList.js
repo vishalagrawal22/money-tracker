@@ -86,10 +86,11 @@ function TransactionList() {
         value: transaction.category,
       }))
       .reduce((categories, category) => {
-        const x = categories.find(
+        const categoryAlreadyPresent = categories.find(
           (currentCategory) => currentCategory["value"] === category["value"]
         );
-        if (!x) {
+
+        if (!categoryAlreadyPresent) {
           return categories.concat([category]);
         } else {
           return categories;
