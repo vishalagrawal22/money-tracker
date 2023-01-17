@@ -37,14 +37,12 @@ async function handleRetrieveTransaction(req, res) {
   const uid = await getUserId(req);
   const user = await User.findOne({ uid });
 
-  let inUser = false;
-  for (const memberId of transaction["users"]) {
-    if (user._id.equals(memberId)) {
-      inUser = true;
-    }
-  }
-
-  if (!(user._id.equals(transaction.creator._id) || inUser)) {
+  if (
+    !(
+      user._id.equals(transaction.creator._id) ||
+      checkObjectIdInArray(user._id, transaction.users)
+    )
+  ) {
     res.status(400).json({
       ok: false,
       message: "transaction can be viewed by users or creator only",
