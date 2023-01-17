@@ -189,3 +189,16 @@ export function useTransaction(id) {
     loading: isLoading,
   };
 }
+
+export function getTransactionStatus(transaction) {
+  const totalUsers = transaction.users.length;
+  const approvals = transaction.approvals.length;
+  const rejections = transaction.rejections.length;
+  if (approvals === totalUsers && rejections === 0) {
+    return "approved";
+  } else if (rejections > 0) {
+    return "rejected";
+  } else {
+    return "pending";
+  }
+}
