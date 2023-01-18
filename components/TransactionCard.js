@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { mutate } from "swr";
-import { Card, Button, ListGroup } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
 
 import { getTransactionStatus, putAsUser } from "../utils/data";
 import { checkUidInArray } from "../utils/helpers";
