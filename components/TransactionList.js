@@ -80,7 +80,7 @@ function TransactionList() {
   const [showFilter, setShowFilter] = useState(false);
 
   function handleFilterChange(newFilters) {
-    setFilters({ newFilters, ...newFilters });
+    setFilters({ ...filters, ...newFilters });
   }
 
   function getCategories() {
