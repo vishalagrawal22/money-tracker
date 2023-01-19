@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { useRouter } from "next/router";
 import { DateTime } from "luxon";
 import { mutate } from "swr";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, ButtonGroup } from "react-bootstrap";
 
 import { getTransactionStatus, putAsUser } from "../utils/data";
 import { checkUidInArray } from "../utils/helpers";
@@ -56,13 +56,7 @@ function getRejectionUserEmailList(transaction, currentUser) {
 }
 
 export default function TransactionCard({ currentUser, transaction }) {
-  async function updateTransactionApprovalStatus(action) {
-    await putAsUser(`/api/v1/transactions/${transaction._id}`, {
-      action,
-    });
-    mutate("/api/v1/transactions");
-    mutate(`/api/v1/transactions/${transaction._id}`);
-  }
+  const router = useRouter();
 
   const canCurrentUserVote = checkCanCurrentUserCanVote(
     transaction,
@@ -74,11 +68,18 @@ export default function TransactionCard({ currentUser, transaction }) {
     currentUser._id
   );
 
-  const renderActionButtons = canCurrentUserVote && !currentUserAlreadyVoted;
-
   const userVote = getCurrentUserVote(transaction, currentUser._id);
-
   const transactionStatus = getTransactionStatus(transaction);
+
+  async function updateTransactionApprovalStatus(action) {
+    await putAsUser(`/api/v1/transactions/${transaction._id}`, {
+      action,
+    });
+    mutate("/api/v1/transactions");
+    mutate(`/api/v1/transactions/${transaction._id}`);
+  }
+
+  const renderActionButtons = canCurrentUserVote && !currentUserAlreadyVoted;
 
   return (
     <Card className="mb-4">
@@ -114,59 +115,59 @@ export default function TransactionCard({ currentUser, transaction }) {
           </Card.Text>
         </div>
         <Card.Text className="mb-3">{transaction.description}</Card.Text>
-        {renderActionButtons ? (
-          <div className="d-flex justify-content-center">
-            <Button
-              variant="success"
-              className="mr-3"
-              active
-              onClick={() => {
-                updateTransactionApprovalStatus("approve");
-              }}
-            >
-              Approve
-            </Button>
-            <Button
-              variant="danger"
-              active
-              onClick={() => {
-                updateTransactionApprovalStatus("reject");
-              }}
-            >
-              Reject
-            </Button>
+
+        {!canCurrentUserVote ? (
+          <div className="text-center fw-semibold">
+            You cannot vote on this transaction because you are not listed as a
+            user
           </div>
         ) : (
-          <>
-            {currentUserAlreadyVoted && userVote === "approved" && (
-              <div className="text-center fw-semibold">
-                You have {userVote} this transaction
-              </div>
-            )}
+          currentUserAlreadyVoted &&
+          userVote === "approved" && (
+            <div className="text-center fw-semibold">
+              You have {userVote} this transaction
+            </div>
+          )
+        )}
 
-            {!canCurrentUserVote && (
-              <div className="text-center fw-semibold">
-                You cannot vote on this transaction because you are not listed
-                as a user
-              </div>
-            )}
+        {transactionStatus === "rejected" && (
+          <div className="text-center fw-semibold">
+            Rejected by{" "}
+            {getRejectionUserEmailList(transaction, currentUser).join(", ")}
+          </div>
+        )}
 
-            {transactionStatus === "rejected" && (
-              <div className="text-center fw-semibold">
-                Rejected by{" "}
-                {getRejectionUserEmailList(transaction, currentUser).join(", ")}
-              </div>
-            )}
+        <Button
+          className="mx-auto mb-3"
+          variant="secondary"
+          onClick={() => {
+            router.push(`/transactions/${transaction._id}`);
+          }}
+          active
+        >
+          Read more
+        </Button>
 
-            <Link
-              className="align-self-center mt-3"
-              href={`/transactions/${transaction._id}`}
-            >
-              <Button variant="secondary" active>
-                Read more
+        {renderActionButtons && (
+          <div className="d-flex justify-content-center align-items-center">
+            <ButtonGroup className="w-1/2">
+              <Button
+                variant="success"
+                onClick={() => updateTransactionApprovalStatus("approved")}
+                active
+              >
+                Approve
               </Button>
-            </Link>
-          </>
+
+              <Button
+                variant="danger"
+                onClick={() => updateTransactionApprovalStatus("rejected")}
+                active
+              >
+                Reject
+              </Button>
+            </ButtonGroup>
+          </div>
         )}
       </Card.Body>
     </Card>

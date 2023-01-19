@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import { mutate } from "swr";
 import {
   Spinner,
   Card,
@@ -10,9 +11,7 @@ import {
 import { DateTime } from "luxon";
 
 import Layout from "../../../components/Layout";
-
 import { deleteAsUser, useTransaction } from "../../../utils/data";
-import { mutate } from "swr";
 
 export default function TransactionPage() {
   const router = useRouter();
@@ -81,7 +80,8 @@ export default function TransactionPage() {
             </ListGroupItem>
           </ListGroup>
         </Card>
-        <ButtonGroup className="mt-4 d-flex">
+
+        <ButtonGroup className="mt-3 d-flex">
           <Button variant="danger" onClick={handleDeleteTransaction} active>
             Delete
           </Button>
