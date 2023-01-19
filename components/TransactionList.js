@@ -80,7 +80,7 @@ function TransactionList() {
   const [showFilter, setShowFilter] = useState(false);
 
   function handleFilterChange(newFilters) {
-    setFilters({ newFilters, ...newFilters });
+    setFilters({ ...filters, ...newFilters });
   }
 
   function getCategories() {
@@ -113,8 +113,10 @@ function TransactionList() {
   }
 
   function getFilteredTransactions() {
+    // destructuring the filters object to get the values of type, category, startDate, and endDate
     const { type, category, startDate, endDate } = filters;
 
+    // filtering transactions based on category, startDate, endDate, and type
     let filteredTransactions = transactions
       .filter((transaction) => !category || transaction.category === category)
       .filter(
@@ -130,6 +132,10 @@ function TransactionList() {
           type === "all" || getTransactionStatus(transaction) === type
       );
 
+    // sorting the filtered transactions by date
+    filteredTransactions.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
     return filteredTransactions;
   }
 
