@@ -29,27 +29,24 @@ export default function Register() {
   const { user } = useUser();
   if (!user) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="bg-white border shadow-lg rounded px-8 pt-6 pb-8">
+      <div className="h-100 d-flex flex-column justify-content-center align-items-center">
+        <div className="border rounded p-4">
           <p
             tabIndex={0}
-            aria-label="Register an account"
-            className="text-xl font-extrabold leading-6 text-gray-800"
+            aria-label="Login to your account"
+            className="fs-5 fw-bold"
           >
             Register an account
           </p>
-          <p className="text-sm mt-4 font-medium leading-none text-gray-500">
+          <p className="text-muted">
             Already have account?{" "}
-            <span
-              tabIndex={0}
-              role="link"
-              aria-label="Login here"
-              className="text-sm font-medium leading-none underline text-gray-800 cursor-pointer"
-            >
-              <Link href="/login">Login here</Link>
+            <span tabIndex={0} role="link" aria-label="Register here">
+              <Link className="text-dark" href="/login">
+                Login here
+              </Link>
             </span>
           </p>
-          <GoogleAuthButton />
+          <GoogleAuthButton type="register" />
           <OrDivider />
           <div>
             <Formik

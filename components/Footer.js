@@ -10,6 +10,7 @@ function Footer() {
             <a
               href="https://www.linkedin.com/in/vishal-agrawal-9390861ba/"
               title="linkedin profile"
+              className="text-white"
             >
               Vishal Agrawal
             </a>
@@ -17,7 +18,7 @@ function Footer() {
         </Row>
         <Row>
           <a
-            className="m-auto w-auto"
+            className="m-auto w-auto text-white"
             href="https://www.flaticon.com/free-icons/money"
             title="money icons"
           >

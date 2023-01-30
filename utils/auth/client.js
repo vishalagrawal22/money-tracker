@@ -30,9 +30,11 @@ export async function loginWithEmailAndPassword(email, password) {
 }
 
 const googleProvider = new GoogleAuthProvider();
-export async function loginOrRegisterWithGooglePopup() {
+export async function loginOrRegisterWithGooglePopup(type) {
   await signInWithPopup(auth, googleProvider);
-  await postAsUser("/api/v1/users");
+  if (type === "register") {
+    await postAsUser("/api/v1/users");
+  }
 }
 
 export async function logout() {
