@@ -1,3 +1,5 @@
+import { NextAdapter } from "next-query-params";
+import { QueryParamProvider } from "use-query-params";
 import Head from "next/head";
 import Spinner from "react-bootstrap/Spinner";
 
@@ -21,7 +23,9 @@ export default function App({ Component, pageProps }) {
           <meta name="description" content="An app to monitor your spending" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Component {...pageProps} />
+        <QueryParamProvider adapter={NextAdapter}>
+          <Component {...pageProps} />
+        </QueryParamProvider>
       </>
     );
   }
