@@ -14,11 +14,10 @@ function FriendRequestList() {
   } else {
     return (
       <>
-        <h5 className="fs-5 mt-4 fw-bold">Pending Friend Requests</h5>
         {friendRequests.length === 0 && (
-          <div className="mt-2">There are no friend requests.</div>
+          <div className="mt-3">There are no friend requests.</div>
         )}
-        <ListGroup as="ul" className="mt-4">
+        <ListGroup as="ul" className="mt-3">
           {friendRequests.map((friendRequest) => (
             <FriendRequest
               key={friendRequest._id}

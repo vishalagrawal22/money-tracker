@@ -43,7 +43,7 @@ function FriendRequestForm() {
         </Button>
       </Form>
       {message !== "" && (
-        <Alert className="mt-4" variant={isError ? "danger" : "success"}>
+        <Alert className="mt-3" variant={isError ? "danger" : "success"}>
           {message}
         </Alert>
       )}

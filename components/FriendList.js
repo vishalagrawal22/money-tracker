@@ -58,11 +58,10 @@ function FriendList() {
   } else {
     return (
       <>
-        <h5 className="fs-5 mt-4 fw-bold">Friend List</h5>
         {friends.length === 0 && (
-          <div className="mt-2">There are no friends.</div>
+          <div className="mt-3">There are no friends.</div>
         )}
-        <Table striped bordered hover responsive className="mt-4">
+        <Table striped bordered hover responsive className="mt-3">
           <thead>
             <tr>
               <th>Email</th>
