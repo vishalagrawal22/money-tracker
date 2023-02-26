@@ -36,10 +36,9 @@ function Budget({ budget }) {
       {editing ? (
         <Form className="d-flex" onSubmit={handleSubmit}>
           <InputGroup className="me-3 d-flex align-items-center">
-            <FormLabel className="me-3 mb-0">Update Budget</FormLabel>
+            <FormLabel className="me-3 mb-0">Update Budget:</FormLabel>
             <FormControl
               type="number"
-              placeholder="Update Budget"
               value={newBudget}
               onChange={handleChange}
               required
