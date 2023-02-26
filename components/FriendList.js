@@ -1,12 +1,10 @@
-import Spinner from "react-bootstrap/Spinner";
-import ListGroup from "react-bootstrap/ListGroup";
+import { useMemo } from "react";
+import { Table, Spinner } from "react-bootstrap";
 
 import { useFriends, useTransactions } from "../utils/data";
 import { useUser } from "../utils/auth/client";
 
 import Friend from "./Friend";
-import { useEffect, useMemo, useState } from "react";
-import { Table } from "react-bootstrap";
 
 function FriendList() {
   const { user: currentUser } = useUser();
@@ -64,7 +62,7 @@ function FriendList() {
         {friends.length === 0 && (
           <div className="mt-2">There are no friends.</div>
         )}
-        <Table striped bordered hover className="mt-4">
+        <Table striped bordered hover responsive className="mt-4">
           <thead>
             <tr>
               <th>Email</th>
