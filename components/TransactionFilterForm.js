@@ -4,7 +4,7 @@ import { Form as BootstrapForm, Button, Alert } from "react-bootstrap";
 import * as Yup from "yup";
 import Select from "react-select";
 
-const TransactionFilterForm = ({ categories, onFilter }) => {
+const TransactionFilterForm = ({ filters, categories, onFilter }) => {
   const checkStartDateBeforeEndDate = (value, context) => {
     const { startDate, endDate } = context.parent;
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
@@ -17,11 +17,11 @@ const TransactionFilterForm = ({ categories, onFilter }) => {
     <Formik
       initialValues={{
         category: {
-          label: "",
-          value: "",
+          label: filters.category,
+          value: filters.category,
         },
-        startDate: "",
-        endDate: "",
+        startDate: filters.startDate,
+        endDate: filters.endDate,
       }}
       validationSchema={Yup.object().shape({
         category: Yup.object().shape({
@@ -36,7 +36,10 @@ const TransactionFilterForm = ({ categories, onFilter }) => {
         endDate: Yup.date(),
       })}
       onSubmit={({ category, ...values }, { setSubmitting }) => {
-        onFilter({ category: category.value, ...values });
+        onFilter({
+          category: category.value !== "" ? category.value : null,
+          ...values,
+        });
         setSubmitting(false);
       }}
     >

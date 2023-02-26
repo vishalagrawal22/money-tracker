@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Spinner, ListGroup, Button, ButtonGroup } from "react-bootstrap";
+import { useQueryParams, StringParam, withDefault } from "use-query-params";
 
 import {
   getTransactionStatus,
@@ -70,11 +71,11 @@ function TransactionList() {
     error: transactionsError,
   } = useTransactions();
 
-  const [filters, setFilters] = useState({
-    type: "all",
+  const [filters, setFilters] = useQueryParams({
+    type: withDefault(StringParam, "all"),
     category: null,
-    startDate: "",
-    endDate: "",
+    startDate: null,
+    endDate: null,
   });
 
   const [showFilter, setShowFilter] = useState(false);
@@ -161,6 +162,7 @@ function TransactionList() {
         {showFilter && (
           <TransactionFilterForm
             categories={getCategories()}
+            filters={filters}
             onFilter={handleFilterChange}
           />
         )}
