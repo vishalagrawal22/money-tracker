@@ -35,10 +35,11 @@ const TransactionFilterForm = ({ filters, categories, onFilter }) => {
         ),
         endDate: Yup.date(),
       })}
-      onSubmit={({ category, ...values }, { setSubmitting }) => {
+      onSubmit={({ category, startDate, endDate }, { setSubmitting }) => {
         onFilter({
           category: category.value !== "" ? category.value : null,
-          ...values,
+          startDate: startDate !== "" ? startDate : null,
+          endDate: endDate !== "" ? endDate : null,
         });
         setSubmitting(false);
       }}
