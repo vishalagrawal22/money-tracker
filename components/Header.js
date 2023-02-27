@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -13,19 +14,32 @@ function Header() {
   return (
     <Navbar bg="light" expand="lg">
       <Container className="ms-0 me-0 mw-100 justify-content-start">
-        <Navbar.Brand href="/">Money Tracker</Navbar.Brand>
+        <Navbar.Brand>
+          <Link href="/" className="text-decoration-none text-reset">
+            Money Tracker
+          </Link>
+        </Navbar.Brand>
         <Navbar.Toggle className="ms-auto" aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link
+            <Link
               href="/transactions"
-              active={router.pathname === "/transactions"}
+              role="button"
+              className={`nav-link ${
+                router.pathname === "/transactions" ? "active" : ""
+              }`}
             >
               Transactions
-            </Nav.Link>
-            <Nav.Link href="/friends" active={router.pathname === "/friends"}>
+            </Link>
+            <Link
+              href="/friends"
+              role="button"
+              className={`nav-link ${
+                router.pathname === "/friends" ? "active" : ""
+              }`}
+            >
               Friends
-            </Nav.Link>
+            </Link>
           </Nav>
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
